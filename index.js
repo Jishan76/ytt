@@ -34,19 +34,8 @@ app.get('/video', async (req, res) => {
 
     const videoUrl = videoFormat.url;
 
-    // Set headers for file download
-    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(firstVideo.title)}.mp4"`);
-    res.setHeader('Content-Type', 'video/mp4');
-
     // Redirect the user to the direct video URL
-    axios.get(videoUrl, { responseType: 'stream' })
-      .then(response => {
-        response.data.pipe(res);
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        res.status(500).send('Internal Server Error');
-      });
+    res.redirect(videoUrl);
   } catch (error) {
     console.error('Error:', error);
     res.status(500).send('Internal Server Error');
@@ -82,19 +71,8 @@ app.get('/audio', async (req, res) => {
 
     const audioUrl = audioFormat.url;
 
-    // Set headers for file download
-    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(firstVideo.title)}.mp3"`);
-    res.setHeader('Content-Type', 'audio/mp3');
-
     // Redirect the user to the direct audio URL
-    axios.get(audioUrl, { responseType: 'stream' })
-      .then(response => {
-        response.data.pipe(res);
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        res.status(500).send('Internal Server Error');
-      });
+    res.redirect(audioUrl);
   } catch (error) {
     console.error('Error:', error);
     res.status(500).send('Internal Server Error');
