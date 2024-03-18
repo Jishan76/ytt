@@ -9,7 +9,7 @@ app.get('/video', async (req, res) => {
   const query = req.query.query;
 
   if (!query) {
-    return res.status(400).send('Missing query parameter');
+    return res.status(400).json({ error: 'Missing query parameter' });
   }
 
   try {
@@ -17,7 +17,7 @@ app.get('/video', async (req, res) => {
     const { videos } = await ytSearch(query);
 
     if (!videos.length) {
-      return res.status(404).send('No videos found');
+      return res.status(404).json({ error: 'No videos found' });
     }
 
     // Get the first video
@@ -29,23 +29,21 @@ app.get('/video', async (req, res) => {
     // Get the highest quality video format
     const videoFormat = ytdl.chooseFormat(videoInfo.formats, { quality: 'highestvideo' });
     if (!videoFormat) {
-      return res.status(404).send('No video found');
+      return res.status(404).json({ error: 'No video found' });
     }
 
     const videoUrl = videoFormat.url;
     const videoTitle = videoInfo.videoDetails.title;
 
-    // Set response headers with video title
-    res.set({
-      'Content-Disposition': `attachment; filename="${videoTitle}.mp4"`,
-      'Content-Type': 'video/mp4'
-    });
+    const responseJson = {
+      title: videoTitle,
+      url: videoUrl
+    };
 
-    // Redirect the user to the direct video URL
-    res.redirect(videoUrl);
+    res.json(responseJson);
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).send('Internal Server Error');
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
@@ -53,7 +51,7 @@ app.get('/audio', async (req, res) => {
   const query = req.query.query;
 
   if (!query) {
-    return res.status(400).send('Missing query parameter');
+    return res.status(400).json({ error: 'Missing query parameter' });
   }
 
   try {
@@ -61,7 +59,7 @@ app.get('/audio', async (req, res) => {
     const { videos } = await ytSearch(query);
 
     if (!videos.length) {
-      return res.status(404).send('No videos found');
+      return res.status(404).json({ error: 'No videos found' });
     }
 
     // Get the first video
@@ -73,23 +71,21 @@ app.get('/audio', async (req, res) => {
     // Get the highest quality audio format
     const audioFormat = ytdl.chooseFormat(videoInfo.formats, { quality: 'highestaudio' });
     if (!audioFormat) {
-      return res.status(404).send('No audio found');
+      return res.status(404).json({ error: 'No audio found' });
     }
 
     const audioUrl = audioFormat.url;
     const audioTitle = videoInfo.videoDetails.title;
 
-    // Set response headers with audio title
-    res.set({
-      'Content-Disposition': `attachment; filename="${audioTitle}.mp3"`,
-      'Content-Type': 'audio/mpeg'
-    });
+    const responseJson = {
+      title: audioTitle,
+      url: audioUrl
+    };
 
-    // Redirect the user to the direct audio URL
-    res.redirect(audioUrl);
+    res.json(responseJson);
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).send('Internal Server Error');
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
