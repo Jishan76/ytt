@@ -33,6 +33,13 @@ app.get('/video', async (req, res) => {
     }
 
     const videoUrl = videoFormat.url;
+    const videoTitle = videoInfo.videoDetails.title;
+
+    // Set response headers with video title
+    res.set({
+      'Content-Disposition': `attachment; filename="${videoTitle}.mp4"`,
+      'Content-Type': 'video/mp4'
+    });
 
     // Redirect the user to the direct video URL
     res.redirect(videoUrl);
@@ -70,6 +77,13 @@ app.get('/audio', async (req, res) => {
     }
 
     const audioUrl = audioFormat.url;
+    const audioTitle = videoInfo.videoDetails.title;
+
+    // Set response headers with audio title
+    res.set({
+      'Content-Disposition': `attachment; filename="${audioTitle}.mp3"`,
+      'Content-Type': 'audio/mpeg'
+    });
 
     // Redirect the user to the direct audio URL
     res.redirect(audioUrl);
