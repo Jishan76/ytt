@@ -1,52 +1,14 @@
 const express = require('express');
 const ytSearch = require('yt-search');
 const ytdl = require('ytdl-core');
-const axios = require('axios');
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-app.get('/video', async (req, res) => {
-  const query = req.query.query;
-
-  if (!query) {
-    return res.status(400).send('Missing query parameter');
-  }
-
-  try {
-    // Search for videos using yt-search
-    const { videos } = await ytSearch(query);
-
-    if (!videos.length) {
-      return res.status(404).send('No videos found');
-    }
-
-    // Get the first video
-    const firstVideo = videos[0];
-
-    // Get video details
-    const videoInfo = await ytdl.getInfo(firstVideo.url);
-
-    // Get the highest quality video format
-    const videoFormat = ytdl.chooseFormat(videoInfo.formats, { quality: 'highestvideo' });
-    if (!videoFormat) {
-      return res.status(404).send('No video found');
-    }
-
-    const videoUrl = videoFormat.url;
-
-    // Redirect the user to the direct video URL
-    res.redirect(videoUrl);
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).send('Internal Server Error');
-  }
-});
 
 app.get('/audio', async (req, res) => {
   const query = req.query.query;
 
   if (!query) {
-    return res.status(400).send('Missing query parameter');
+    return res.status(400).json({ error: 'Missing query parameter' });
   }
 
   try {
@@ -54,7 +16,7 @@ app.get('/audio', async (req, res) => {
     const { videos } = await ytSearch(query);
 
     if (!videos.length) {
-      return res.status(404).send('No videos found');
+      return res.status(404).json({ error: 'No videos found' });
     }
 
     // Get the first video
@@ -66,16 +28,24 @@ app.get('/audio', async (req, res) => {
     // Get the highest quality audio format
     const audioFormat = ytdl.chooseFormat(videoInfo.formats, { quality: 'highestaudio' });
     if (!audioFormat) {
-      return res.status(404).send('No audio found');
+      return res.status(404).json({ error: 'No audio found' });
     }
 
-    const audioUrl = audioFormat.url;
+    const audioTitle = videoInfo.videoDetails.title;
 
-    // Redirect the user to the direct audio URL
-    res.redirect(audioUrl);
+    // Set headers for file download
+    res.set({
+      'Content-Disposition': `attachment; filename="${audioTitle}.mp3"`,
+      'Content-Type': 'audio/mpeg',
+    });
+
+    // Pipe the audio stream to response for download
+    ytdl(firstVideo.url, { format: audioFormat })
+      .pipe(res);
+
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).send('Internal Server Error');
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
