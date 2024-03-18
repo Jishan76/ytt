@@ -9,7 +9,7 @@ app.get('/video', async (req, res) => {
   const query = req.query.query;
 
   if (!query) {
-    return res.status(400).json({ error: 'Missing query parameter' });
+    return res.status(400).send('Missing query parameter');
   }
 
   try {
@@ -17,7 +17,7 @@ app.get('/video', async (req, res) => {
     const { videos } = await ytSearch(query);
 
     if (!videos.length) {
-      return res.status(404).json({ error: 'No videos found' });
+      return res.status(404).send('No videos found');
     }
 
     // Get the first video
@@ -29,21 +29,16 @@ app.get('/video', async (req, res) => {
     // Get the highest quality video format
     const videoFormat = ytdl.chooseFormat(videoInfo.formats, { quality: 'highestvideo' });
     if (!videoFormat) {
-      return res.status(404).json({ error: 'No video found' });
+      return res.status(404).send('No video found');
     }
 
     const videoUrl = videoFormat.url;
-    const videoTitle = videoInfo.videoDetails.title;
 
-    const responseJson = {
-      title: videoTitle,
-      url: videoUrl
-    };
-
-    res.json(responseJson);
+    // Redirect the user to the direct video URL
+    res.redirect(videoUrl);
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).send('Internal Server Error');
   }
 });
 
@@ -51,7 +46,7 @@ app.get('/audio', async (req, res) => {
   const query = req.query.query;
 
   if (!query) {
-    return res.status(400).json({ error: 'Missing query parameter' });
+    return res.status(400).send('Missing query parameter');
   }
 
   try {
@@ -59,7 +54,7 @@ app.get('/audio', async (req, res) => {
     const { videos } = await ytSearch(query);
 
     if (!videos.length) {
-      return res.status(404).json({ error: 'No videos found' });
+      return res.status(404).send('No videos found');
     }
 
     // Get the first video
@@ -71,21 +66,16 @@ app.get('/audio', async (req, res) => {
     // Get the highest quality audio format
     const audioFormat = ytdl.chooseFormat(videoInfo.formats, { quality: 'highestaudio' });
     if (!audioFormat) {
-      return res.status(404).json({ error: 'No audio found' });
+      return res.status(404).send('No audio found');
     }
 
     const audioUrl = audioFormat.url;
-    const audioTitle = videoInfo.videoDetails.title;
 
-    const responseJson = {
-      title: audioTitle,
-      url: audioUrl
-    };
-
-    res.json(responseJson);
+    // Redirect the user to the direct audio URL
+    res.redirect(audioUrl);
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).send('Internal Server Error');
   }
 });
 
